@@ -3,13 +3,7 @@ This repo contains an R project file for my paper "Development of Modern Civilaz
 
 The original paper can be found here: https://www.jstor.org/stable/10.2307/27099463
 
-This repo contains two folders: inputs and outputs. 
-
-Inputs:
-```
-Data: processed data
-Literature: the original paper and supplemental material
-```
+This repo contains outputs. 
 
 Outputs:
 
