@@ -1,0 +1,232 @@
+---
+title: Development of Modern Civilazation and Recessions causing Major Impacts and
+  Declines in Birth Rates
+author: "Emily Panus"
+date: "22/02/2022"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+abstract: Birth rates allow to assess the well-being and population of the economy.
+  Measuring demographics and characteristics that influence births and population
+  help with development, economic growth and reducing poverty in communities struggling
+  with either too high or low birth rates. Birth rates in the United States have shown
+  a declining trend in the last decades caused by many economical and social factors
+  such as ethnicity, education levels, and age. This study reproduces results of the
+  declining birth rates particularly during and after the Great Recession in the United
+  States depending on different communities most noticeably seen in youth, Hispanic
+  backgrounds, and college educated women that show the affects of current governmental
+  progresses but can also aid in planning future policies and funding for education
+  and health systems as well as improve the health of a nation, its women, and children.
+subtitle: "Replicating: 'The Puzzle of Falling US Birth Rates since the Great Recession'"
+bibliography: myreferences.bib
+---
+
+\tableofcontents
+
+\listoffigures
+
+\newpage
+
+# Introduction 
+
+Birth rates have been used to calculate the ratio of the number of live-born births per one thousand in population in a certain year, which determines the number of babies born and the growth or decline of the population. The birth rate measure acts as telling sign of the social and economic status of a country and its population. There is quite much importance of birth rates, as they are a telling sign of an economies health. In this study, we will the fluctuations of birth rates depending on if the United States is in an economic recession or recovery and see that the economy may not only experience declining wages and employment but also birth rates. It cannot be said that either high or low birth rates are better, however, in this study we will see that The United States, a developed country has a lower and declining birth rate. Healthy economies or more developed countries usually have lower birth rates because it shows that there are more modern approaches to health and opportunistic supports that results in less children and poverty in a country. However, if rates go to low the population of the nation will grow older and die off, which will lower population and with less live births it can slow economic growth and strain government policies. Population control is necessary to maintain right amount of resources and limit challenges but can be unethical, like the one-child policy that was introduced in China to restrict population growth for the good of the economy, but now with certain modern evolvement coming into play that is restraining high birth rates can cause population to be more under control and can benefit the health of economy future generations by providing more resources and less environmental challenges. This study with show the affects of recessions on birth rates and suggest the other effects of the development of modern civilization, especially for women. ^[ Codes and data are available at the GitHub repo: https://github.com/panusemi/Birth-Rates.git]
+
+# Data
+In this report, the data regarding the birth rates in the United States is obtained and reproduced from American Economics Association in the Journal of Economic Perspectives “The Puzzle of Falling US Birth Rates since the Great Recession” written and analyzed by Melissa S. Kearney, Phillip B. Levine and Luke Pardue.  The data details recorded births in the United States from 1980-2020 with a big emphasis on the period from 2007-2020 after the great recession, among women 15-44 and within selected age and race or ethnicity groups. The data that will be reproduced, registers that factor involved in the changes of birth rates in the United States by age, nationality, education, and residence allocate these effects on birth rates. The reported birth rate dataset used was obtained in csv format collected by CDC WONDER Natality Database, CDC SEER Population Estimates, Current Population Survey (CPS) Merged Outgoing Rotation Groups, CPS Annual Social and Economic Supplement, American Community Survey, Behavioral Risk and Surveillance Survey, New York Federal Reserve Bank/EQUIFAX, Pew Research Center collected from 1980 to 2020. The data reproduced alluding to the birth rates in the United States summarizes the details, characteristics, and totals of birth rates contingent on women and their attributes from 1980 to 2020. Using `R` [@citeR], `tidyverse` [@citetidyverse], `ggplot2` [@citeggplot], `readr`[@citereadr], `usmap`[@citeusmap] and `maps` [@citemaps], I extracted the necessary processed data to start my exploratory analysis. \linebreak
+
+The main variables use in the study are done by birth rate. Beginning with the total birth rate in each given year, the rest of the data is spit up into its factors describing birth rates based on its attribute like birth rates depending on mothers age groups starting from teen years 15 to 19, 20 to 24, 25 to 29, 30 to 34, 35 to 30 and finally stops at 40 to 44 as many women over this age do not and cannot have children. Similarly, there are variables describing birth rates dependent on woman’s ethnicity of white non-Hispanic, black non-Hispanic and Hispanic. Education is also a prevalent factor in birth rates and split into degree levels: no high school diploma, high school diploma graduate, some college done, and college degree graduate. It also includes the birth rates when partners are married versus when unmarried. 
+
+\newpage
+
+```{r include=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(maps)
+library(usmap)
+library(readr)
+```
+
+```{r echo=FALSE}
+brate_data <- read_csv("fig_1.csv", show_col_types = FALSE)
+```
+
+
+```{r echo=FALSE, warning=FALSE, fig.cap="Birth rates from 1980 to 2020"}
+ggplot(brate_data, aes(x=year, y=brate_all))+
+  geom_line()+
+  theme_minimal()+
+  ylab("birth rate")
+```
+
+
+Birth rates are defined as the ratio between the number of live births and the average total population of that year. There has overall been a large decline in the birth rates in the United States from 1980 to 2020, with a birth rate of 68.4% in 1980 and 55.8% in 2020. There are two obvious large troughs, in 1990 and 2007 with birth rates 70.9% and 69.3% respectively. The increase in birth rates at a high of 70.9% in 1990, which can be as a result of large as well as domestic migration to the United States. We see the massive decline after the 2007, the Great Recession, as the research done by Kearney, Levine and Pardue showing how the great recession produced higher opportunity cost to have a baby; with decreased employment and wages, reduced the chances of women wanting a or another baby. However, the continual decreasing steady slope is a result of improved opportunities for woman careers and education, advances in reproductive health with more contraceptives and parent planning. 
+
+\newpage
+
+
+```{r echo=FALSE}
+state_births_04_19 <- read_csv("fig_7.csv", show_col_types = FALSE)
+```
+
+```{r echo=FALSE}
+usa <- map_data("state")
+
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+      sep="", collapse=" ")
+}
+
+usa$region <- sapply(usa$region, simpleCap)
+```
+
+```{r echo=FALSE}
+usa$stname <- state.abb[match(usa$region, state.name)]
+```
+
+```{r echo=FALSE}
+mapdata <- left_join(usa, state_births_04_19, by="stname")
+mapdata <- mapdata %>% rename(percent_change = brate1544_thsnds_ch_pct)
+```
+
+
+```{r echo=FALSE, fig.cap="Change in birth rates in each state from 2004-2008 and 2015-2019"}
+ggplot(mapdata, aes(x=long, y=lat, group=group))+
+  geom_polygon(aes(fill=percent_change), colour="black")+
+  scale_fill_gradient(low = "blue", high = "red")+
+  labs(colour = "Percent change")+
+  scale_color_discrete(name = "Dataset")+
+  theme_minimal()
+```
+
+The data represents the birth rate in the United States. Illustrated the changes in birth rates in each state with the change in 2004 to 2008 and 2015 to 2019. The first noticeable thing on the map is that North Dakota experienced the largest increase change in birth rates from 2004 to 2008 and 2015 to 2019 with a change of 26.9%. On the other hand, New Mexico experienced the largest decline in birth rates from 2004 to 2008 and 2015 to 2019 with a negative change of 18.6%. Most of the states in the United States remained quite neutral, with the northern and southern states having a more positive, increasing change in birth rates, while the western and eastern states have more of a negative decline in birth rates, with most of the decline in birth rates were on the western part of the country. 
+
+\newpage
+
+
+```{r echo=FALSE}
+marstat_data <- read_csv("fig_6.csv", show_col_types = FALSE)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, fig.cap="Birth rates depending on whether couples were married or unmarried"}
+colors <- c("unmarried"="blue", "married"="red")
+
+ggplot()+
+  geom_line(data = marstat_data, aes(x = year, y = brate_unmarried, color = "unmarried")) +
+  geom_line(data = marstat_data, aes(x = year, y = brate_married, color = "married")) +
+  theme_minimal()+
+    labs(x = "Year",
+         y = "Birth Rate",
+         color = "Spousal relation") +
+    scale_color_manual(values = colors)
+```
+
+
+A couple’s martial status has an affect on whether they have a baby, as most pregnancies happen in marriage. However, over the last few decades marriages have become less common and/or most people are marrying later in life as societal norms and religions are changing. The decrease in marriages or later marriages means that there is less fertility and less family planning. As the figure shows martial birth rates have declined because the number of unmarried people has increased, and the married populations are getting older. Birth rates for the people who are married from 1980 to 2020 has had a quite consistent trend that is decreasing with small fluctuations, for those who were unmarried back in 1980s the birth rate was as low as 29.4% as back in the day due to religion and other factors have children when unmarried was not common but continued to increase till 2007 to 51.8% but continued a decreasing trend till 2020 to 39.9% as mentioned due to the less amount of marriages in today’s day in age.
+
+\newpage
+
+
+```{r echo=FALSE}
+educ_data <- read_csv("fig_5.csv", show_col_types = FALSE)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, fig.cap="Birth rates depending on womans education level"}
+colors <- c("less high school"="orange", "high school grad"="red", "some college"="green", "college grad"="blue")
+
+ggplot()+
+  geom_line(data = educ_data, aes(x = year, y = brate_lesshs, color = "less high school")) +
+  geom_line(data = educ_data, aes(x = year, y = brate_hsgrad, color = "high school grad"))+ 
+  geom_line(data = educ_data, aes(x = year, y = brate_somecoll, color = "some college")) +
+  geom_line(data = educ_data, aes(x = year, y = brate_colgrad, color = "college grad")) +
+  theme_minimal()+
+    labs(x = "Year",
+         y = "Birth Rate",
+         color = "Education level") +
+    scale_color_manual(values = colors)
+```
+
+
+Over the last few decades, women have had an increase in rights and opportunities allowing them to be less involved in household management and the societal gender roles but have become more equal in expanding their involvement in education and career opportunities that men have as well. The graph shows that the number of women with higher education levels reduces birth rates. The most obvious decline in birth rates is seen in woman who are college graduates which fell from 70.5% to 59.3%. This makes sense as for one those who prioritize their education and careers are less likely to have children, as opposed to women who are less than a high school graduate has very high birth rates with its highest trough in around 2007 with a birth rate of 120.6%, which can be the cause of many factors as education leads to more awareness of sex education and contraceptives but also can relate to a person’s wealth and like in some developing countries some people need more children to work and get money from the family. 
+
+\newpage
+
+
+```{r echo=FALSE}
+brate_all <-  read_csv("figs_1_2_3.csv", show_col_types = FALSE)
+eth_data <- brate_all %>% select(year, brate_whitenh, brate_blacknh, brate_hisp)
+eth_data<-na.omit(eth_data)
+```
+
+
+
+```{r echo=FALSE, fig.cap="Birth rates depending on womans ethnicity"}
+colors <- c("white"="red", "black"="orange", "hispanic"="blue")
+
+ggplot()+
+  geom_line(data = eth_data, aes(x = year, y = brate_whitenh, color = "white")) +
+  geom_line(data = eth_data, aes(x = year, y = brate_blacknh, color = "black"))+ 
+  geom_line(data = eth_data, aes(x = year, y = brate_hisp, color = "hispanic")) +
+  theme_minimal()+
+    labs(x = "Year",
+         y = "Birth Rate",
+         color = "Ethnicity") +
+    scale_color_manual(values = colors)
+```
+
+
+As previously mentioned in Figure 1, a huge reason for a factor of an increase in birth rates was immigration and domestic migration. However, the graph shows that White, Black, and Hispanic women all had a consistent decline in birth rates from 1980 to 2020 with a large trough in around 2007, the Great Recession. The Hispanic women had the largest overall drastic decline of birth rate at 104.9% that fell all the ay down to 62.8% in 2020. The high birth rates of Hispanic women can be associated with the large amounts of immigration but also poorer living standards, low social status, and low educational levels. The decline over the last few decades are the improved lifestyles and opportunities that Hispanic women can get that previously were not present get in the United States. 
+
+\newpage
+
+
+```{r echo=FALSE, warning=FALSE, fig.cap="Birth rates depending on mothers ethnicity"}
+colors <- c("14-19"="red", "20-24"="orange", "25-29"="blue", "30-34"="green", "35-39"="purple", "40-44"="black")
+
+ggplot()+
+  geom_line(data = brate_all, aes(x = year, y = brate_1519, color = "14-19")) +
+  geom_line(data = brate_all, aes(x = year, y = brate_2024, color = "20-24"))+ 
+  geom_line(data = brate_all, aes(x = year, y = brate_2529, color = "25-29")) +
+  geom_line(data = brate_all, aes(x = year, y = brate_3034, color = "30-34")) +
+  geom_line(data = brate_all, aes(x = year, y = brate_3539, color = "35-39"))+ 
+  geom_line(data = brate_all, aes(x = year, y = brate_4044, color = "40-44")) +
+  theme_minimal()+
+    labs(x = "Year",
+         y = "Birth Rate",
+         color = "Age Group") +
+    scale_color_manual(values = colors)
+```
+
+
+Lastly, age is a big factor when women decide or get pregnant. The data shows that the 14 to 19 and 20 to 24 age group has had the largest decline in birth rates. Going back to all the other areas previously analyzed about birth rates, age seems to be correlated with that. Since women are waiting longer to get married, have more job and education opportunities, more knowledge of sex ed and contraceptives, better healthcare as well as less gender inequalities and poverty, the delay of children and pregnancy has drastically increased in today’s society causing the decline of birth rates for women of very young ages. In the other hand, women in their thirties have experienced an increase in birth rates, which makes sense and to back up the previous point, with later marriages and those who are well educated wait later in life to give birth. 
+
+\newpage 
+
+# Results
+
+My methodologies used for analyzing the same birth rate data resulted in comparable results by Kearney, Levine, and Pardue. Reproducibility was used to achieve the goal of replicating and reproducing results by Kearney, Levine, and Pardue and not only for the verification the results of the data but also understand the thought process and results of birth rates to society. The United States has experienced decline in birth rates from collected data from 1980 to 2020 that were very prominent after the Great Recession in 2007, which can be concluded that the collapse of the housing market created a large impact of the amount of live births in that period of time. When an economy experiences a recession, often we think of the bigger picture where businesses have less demand, lose money, decrease in GDP, and increase in unemployment as well as harming the stock market. However, through this data we see the large impact on the population and the birth of future generations. Being in a developed country, affects fertility and birth during a recession and as the data shows the decision of childbearing based on different characteristics such as age, social and educational status. The data shows that the most prevalent decline after the Great Recession in 2007 was from teens age 14 to 19, Hispanic women as well as college-educated women. Although it would make sense that when the economy is growing, people would be more willing and capable of having more children but in practice the higher the economic prosperity the lower the birth rate. \linebreak
+
+Although recession largely impact birth rates and pushed the United States to have declining rates, the data seems to tell us that it is the societal and technological or health advances are what is keeping the birth rates in the United States low. The data demonstrates the fact the with more women in education and work, the delay in marriages and strains from religion, increase in health and sex education as well as greater access to contraception are big factors in determining the birth rates. We previously discussed that higher birth rates are a good measure of economic prosperity and the health of a nation. There are obvious opposites that developing countries face but developed countries have progressed from including the continuous age-sex construct and jobs designated to each group that do not provide many female career employment opportunities, traditional religious and social beliefs that control what people can and cannot do especially in terms of contraception and abortion as well as early age of marriage. Developing countries have high poverty levels, where infant mortality is high but also families tend to have on average many more children as a resource to make money for the family and do not have the resources to overcome and develop into a healthier economy. A recession is an obvious indicator that birth rates go down, but historically when in times of recovery, birth rates grow again, like during World War II birth rates where at an all time low but where able to rise to a high maximum of 70.9% in 1990. But the last 10 years show us that that after the Great Recession, birth rates have not started to go up but have been consistently decreasing, even when economy is recovering. Hence, it can be concluded that the development of modern civilization; health and technological advances and support, and recessions produce major impacts and declines in birth rates. 
+
+
+# Discussion
+
+The results of this analysis show us that there are many factors that result in the decline of birth rates. The change in societal norms and opportunistic advances have also drastically changed birth rates and population changes in the United States. The Unites States is a developed and growing country were the decline of birth rates is reasonable in creating a healthier economy as it has the resources to do so. The great recession had a huge impact on the United States as it was the largest recession since World War II. The collapse of the housing market caused harm in the economy but was able to build its way back up and recover and grow. The progress and advances throughout the decades were prevalent in changing the society and economy in America, where many developing countries do not have the same growth rates and opportunities to advance in such ways. \linebreak
+
+Another point or question to bring up and notice is birth rates in times of recessions. This data and the analysis done by Kearney, Levine and Pardue prevalently focuses on the large decline in birth rates after the Great Recession in 2007. The rates become close to as low as the decline in birth rates during the Great Depression in the 1930s (Haub 2009). This made me question whether every economy that experiences a recession experiences a high decline in birth rates and but in recovery the rates rise again. However, after this analysis I think a recession definitely is the beginning of falling birth rates, but I think in this study and circumstance the large decline will decline more and more or remain steadier after the large fall due to the actor studied. Historically after the large decline in birth rates in the Great Depression the economy and birth rates where able to plummet back up to high rates and jump back into a growing economy. After the Great Recession on the other hand, the decline was large but the economy in the United States did not experience a large shock back up in birth rates but the opposite with what happened in the post World War II times. This means we can conclude that a recession is a major cause of the decline in birth rates due to the circumstances of more unemployment and hardships citizens must face, but the stay of low birth rates is dependent on other factors studied in this paper such as the advances in education, women opportunities for jobs and greater access and knowledge of contraceptives. Additionally, in 2019 when the Covid-19 pandemic began the economy was experiencing recession in 2020, we do not see a major decline in birth rates but a constant steady decrease. Decreasing birth rates can be good to a certain point as it can improve the state economy and environment, but if reaches too low of rates will drastically increase the population of the young. 
+
+
+\newpage 
+
+# References 
+ 
+Haub, C. (2009, July 8). The U.S. recession and the birth rate. PRB. Retrieved from https://www.prb.org/resources/the-u-s-recession-and-the-birth-rate/#:~:text=The%20U.S.%20birth%20rate%20reached,another%20record%20low%20of%201.7.
+
+Kearney, Melissa S., Phillip B. Levine, and Luke Pardue. “The Puzzle of Falling US Birth Rates since the Great Recession.” Journal of Economic Perspectives 36, no. 1 (February 2022): 151–76. https://doi.org/10.1257/jep.36.1.151. 
+
+  
