@@ -7,7 +7,7 @@ This repo contains two folders: inputs and outputs.
 
 Inputs:
 ```
-Data: codebook for the original data (data is only available through ICPSR)
+Data: processed data
 Literature: the original paper and supplemental material
 ```
 
